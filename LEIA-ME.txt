@@ -1,0 +1,43 @@
+COMO PUBLICAR NO GITHUB PAGES
+=============================
+
+Arquivos deste pacote (todos vão na RAIZ do repositório):
+  - index.html               (o app)
+  - manifest.json            (define o app instalável)
+  - sw.js                    (service worker: faz funcionar offline)
+  - icon-192.png
+  - icon-512.png
+  - icon-maskable-512.png
+  - apple-touch-icon.png
+  - favicon-32.png
+
+PASSO A PASSO
+-------------
+1. No GitHub, crie um repositório novo (ex: "enderecos").
+2. Em "Add file" > "Upload files", arraste TODOS os arquivos acima
+   (sem pasta - eles têm que ficar na raiz). Faça o commit.
+3. Vá em Settings > Pages.
+4. Em "Build and deployment" > "Source", escolha "Deploy from a branch".
+5. Branch: "main" (ou "master"), pasta: "/ (root)". Salve.
+6. Aguarde ~1 minuto. O endereço aparece no topo da página, algo como:
+   https://SEU-USUARIO.github.io/enderecos/
+
+COMO INSTALAR NO PC / CELULAR
+-----------------------------
+- Abra esse endereço no Chrome ou Edge.
+- No PC: aparece um ícone de instalar na barra de endereço (ou
+  menu > "Instalar Endereços dos Clientes").
+- No celular: menu > "Adicionar à tela inicial" / "Instalar app".
+- Depois de instalado, abre numa janela própria, com ícone, e
+  funciona offline.
+
+OBSERVAÇÕES
+-----------
+- Os caminhos são relativos (./), então funciona mesmo dentro de
+  uma subpasta do github.io. Não precisa mudar nada.
+- Os dados dos clientes ficam salvos no proprio navegador do
+  aparelho (localStorage). Use o botao "Backup" de vez em quando
+  para guardar uma copia e poder restaurar em outro aparelho.
+- Quando você atualizar o app, troque a linha
+      const CACHE = 'enderecos-clientes-v1';
+  em sw.js para 'v2', 'v3'... assim o navegador busca a versão nova.
