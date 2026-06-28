@@ -1,5 +1,5 @@
 /* Service Worker - Endereços dos Clientes */
-const CACHE = 'enderecos-clientes-v3';
+const CACHE = 'enderecos-clientes-v5';
 const ASSETS = [
   './',
   './index.html',
