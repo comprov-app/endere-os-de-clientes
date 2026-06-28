@@ -14,7 +14,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Endereços">
 <script>
-/* Define o tema antes de pintar a tela, para não piscar */
 (function(){
   try{
     var t = localStorage.getItem('enderecos_theme');
@@ -31,6 +30,7 @@
     --toast-bg:#1a1f2e;--toast-fg:#ffffff;
     --border:#e3e8ef;
     --accent:#0d9488;--accent-dark:#0f766e;--accent-soft:rgba(13,148,136,.12);
+    --box:#e08600;--bloco:#6366f1;
     --success:#16a34a;--danger:#dc2626;--danger-bg:#fef2f2;--danger-border:#fecaca;
     --shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);
     --shadow-lg:0 10px 30px rgba(16,24,40,.12);
@@ -42,6 +42,7 @@
     --toast-bg:#e7ecf3;--toast-fg:#0f1520;
     --border:#2a3442;
     --accent:#16b8a6;--accent-dark:#0d9488;--accent-soft:rgba(22,184,166,.18);
+    --box:#f59e0b;--bloco:#818cf8;
     --success:#22c55e;--danger:#f87171;--danger-bg:rgba(248,113,113,.12);--danger-border:rgba(248,113,113,.35);
     --shadow:0 1px 2px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.4);
     --shadow-lg:0 12px 34px rgba(0,0,0,.5);
@@ -85,14 +86,26 @@
   .tools{display:flex;gap:8px;flex-wrap:wrap}
   .tools .btn{padding:8px 12px;font-size:13px}
 
+  .filters{max-width:980px;margin:0 auto;padding:12px 20px 0;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+  .chip:hover{border-color:var(--accent)}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .chip span{font-size:11px;background:rgba(0,0,0,.12);padding:1px 7px;border-radius:999px;min-width:20px;text-align:center}
+  .chip.active span{background:rgba(255,255,255,.25)}
+
   main{max-width:980px;margin:0 auto;padding:12px 20px 90px}
   .list{display:flex;flex-direction:column;gap:12px}
 
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);display:flex;align-items:stretch;overflow:hidden;transition:border-color .15s,box-shadow .15s}
   .card:hover{border-color:var(--accent)}
   .card-body{flex:1;padding:16px 18px;min-width:0}
-  .card-name{font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px;word-break:break-word}
-  .card-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px 18px}
+  .card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .card-name{font-size:16px;font-weight:700;letter-spacing:-.01em;word-break:break-word}
+  .badge{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;color:#fff;flex-shrink:0}
+  .badge.excursao{background:var(--accent)}
+  .badge.box{background:var(--box)}
+  .badge.bloco{background:var(--bloco)}
+  .card-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 18px}
   .fld{font-size:13px;min-width:0}
   .fld .k{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;display:block}
   .fld .v{color:var(--text-2);word-break:break-word}
@@ -123,15 +136,21 @@
   .modal-head h2{font-size:18px;font-weight:700;letter-spacing:-.01em}
   .modal-head p{font-size:13px;color:var(--muted);margin-top:4px}
   .modal-body{padding:18px 22px}
+  .seg-label{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+  .seg{display:flex;gap:5px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px}
+  .seg button{flex:1;padding:9px 6px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);transition:.15s}
+  .seg button.active{background:var(--accent);color:#fff}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .field{margin-bottom:14px}
   .field.full{grid-column:1 / -1}
   .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-2)}
-  .field input,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:var(--input-bg);transition:border-color .15s,box-shadow .15s}
-  .field textarea{min-height:120px;resize:vertical;line-height:1.55}
-  .field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .field input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:var(--input-bg);transition:border-color .15s,box-shadow .15s}
+  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  #editorFields .grid2 .field{margin-bottom:0}
+  .field textarea{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:var(--input-bg);min-height:120px;resize:vertical;line-height:1.55}
+  .field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .field .hint{font-size:12px;color:var(--muted);margin-top:6px}
-  .modal-foot{padding:14px 22px 22px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);margin-top:4px}
+  .modal-foot{padding:16px 22px 22px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);margin-top:6px}
   .modal-foot.between{justify-content:space-between}
 
   .btn-danger{background:var(--danger);color:#fff}
@@ -165,7 +184,7 @@
     </div>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="search" type="text" placeholder="Buscar por nome, cidade, excursão..." autocomplete="off">
+      <input id="search" type="text" placeholder="Buscar por nome, cidade, setor..." autocomplete="off">
     </div>
     <button class="icon-btn" onclick="toggleTheme()" title="Alternar modo noturno" aria-label="Alternar modo noturno">
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -197,6 +216,8 @@
   </div>
 </div>
 
+<div class="filters" id="filters"></div>
+
 <main>
   <div class="list" id="list"></div>
 </main>
@@ -206,35 +227,12 @@
   <div class="modal">
     <div class="modal-head">
       <h2 id="editorTitle">Adicionar cliente</h2>
-      <p>Preencha os campos. Depois é só clicar em "Copiar" para colar tudo no BarTender.</p>
+      <p>Escolha a modalidade e preencha os campos. Depois é só "Copiar" para colar no BarTender.</p>
     </div>
     <div class="modal-body">
-      <div class="field">
-        <label for="f_nome">Nome</label>
-        <input id="f_nome" type="text" placeholder="Maria Confecções" autocomplete="off">
-      </div>
-      <div class="grid2">
-        <div class="field">
-          <label for="f_telefone">Telefone</label>
-          <input id="f_telefone" type="text" inputmode="numeric" placeholder="(81) 99999-0000" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="f_cidade">Cidade</label>
-          <input id="f_cidade" type="text" placeholder="Caruaru" autocomplete="off">
-        </div>
-        <div class="field full">
-          <label for="f_excursao">Excursão</label>
-          <input id="f_excursao" type="text" placeholder="Nome da excursão" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="f_setor">Setor</label>
-          <input id="f_setor" type="text" placeholder="Amarelo" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="f_vaga">Vaga</label>
-          <input id="f_vaga" type="text" placeholder="12" autocomplete="off">
-        </div>
-      </div>
+      <div class="seg-label">Modalidade</div>
+      <div class="seg" id="modSeg"></div>
+      <div id="editorFields"></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeEditor()">Cancelar</button>
@@ -262,11 +260,11 @@
   <div class="modal">
     <div class="modal-head">
       <h2>Importar do bloco de notas</h2>
-      <p>Cole sua lista abaixo. Separe cada cliente com uma linha em branco. O app reconhece as linhas Nome, Telefone, Cidade, Excursão, Setor e Vaga.</p>
+      <p>Cole sua lista abaixo. Cada "Nome" começa um cliente novo. A modalidade é detectada pelos campos (Vaga = Excursão, Box = BOX, Bloco = Bloco).</p>
     </div>
     <div class="modal-body">
       <div class="field">
-        <textarea id="importText" style="min-height:200px" placeholder="Nome: Maria Confecções&#10;Telefone: (81) 99999-0000&#10;Cidade: Caruaru&#10;Excursão: Expresso Sul&#10;Setor: Amarelo&#10;Vaga: 12&#10;&#10;Nome: João Atacado&#10;Telefone: (81) 98888-0000&#10;Cidade: Santa Cruz do Capibaribe&#10;Setor: Verde&#10;Vaga: 7"></textarea>
+        <textarea id="importText" placeholder="Nome: Maria Confecções&#10;Telefone: (81) 99999-0000&#10;Cidade: Caruaru&#10;Excursão: Expresso Sul&#10;Setor: Amarelo&#10;Vaga: 12&#10;Nome: João Atacado&#10;Telefone: (81) 98888-0000&#10;Setor: Verde&#10;Rua: A&#10;Box: 210"></textarea>
         <div class="hint" id="importPreview">Nenhum cliente detectado ainda.</div>
       </div>
     </div>
@@ -280,21 +278,40 @@
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg">Copiado!</span></div>
 
 <script>
-const STORAGE_KEY = 'enderecos_clientes_v2';
+const STORAGE_KEY = 'enderecos_clientes_v3';
 const THEME_KEY = 'enderecos_theme';
-const FIELDS = [
-  {key:'nome',     label:'Nome'},
-  {key:'telefone', label:'Telefone'},
-  {key:'cidade',   label:'Cidade'},
-  {key:'excursao', label:'Excursão'},
-  {key:'setor',    label:'Setor'},
-  {key:'vaga',     label:'Vaga'},
-];
+
+const FIELD_META = {
+  nome:     {label:'Nome',     ph:'Maria Confecções'},
+  telefone: {label:'Telefone', ph:'(81) 99999-0000', phone:true},
+  cidade:   {label:'Cidade',   ph:'Caruaru'},
+  excursao: {label:'Excursão', ph:'Nome da excursão', full:true},
+  setor:    {label:'Setor',    ph:'Amarelo'},
+  vaga:     {label:'Vaga',     ph:'12'},
+  rua:      {label:'Rua',      ph:'A'},
+  box:      {label:'Box',      ph:'210'},
+  bloco:    {label:'Bloco',    ph:'B'},
+  loja:     {label:'Loja',     ph:'45'},
+};
+const MODALIDADES = {
+  excursao: {label:'Excursão', fields:['nome','telefone','cidade','excursao','setor','vaga']},
+  box:      {label:'BOX',      fields:['nome','telefone','setor','rua','box']},
+  bloco:    {label:'Bloco',    fields:['nome','telefone','setor','bloco','loja']},
+};
+const ALL_KEYS = Object.keys(FIELD_META);
+
 let clientes = [];
 let editingId = null;
 let deletingId = null;
+let editorMod = 'excursao';
+let lastModalidade = 'excursao';
+let currentFilter = 'todos';
 
-function blank(){ return {id:uid(), nome:'', telefone:'', cidade:'', excursao:'', setor:'', vaga:''}; }
+function blank(){
+  const o = {id:uid(), modalidade:'excursao'};
+  ALL_KEYS.forEach(k => o[k] = '');
+  return o;
+}
 
 /* ---------- Tema ---------- */
 function applyTheme(t){
@@ -322,19 +339,21 @@ function save(){
 }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-/* ---------- Copy format (this is what goes to BarTender) ---------- */
+/* ---------- Copy format (vai para o BarTender) ---------- */
 function formatClient(c){
-  return FIELDS.map(f => `${f.label}:${c[f.key] || ''}`).join('\n');
+  const mod = MODALIDADES[c.modalidade] || MODALIDADES.excursao;
+  return mod.fields.map(k => `${FIELD_META[k].label}:${c[k] || ''}`).join('\n');
 }
 
 /* ---------- Render ---------- */
 function render(){
   const term = document.getElementById('search').value.trim().toLowerCase();
-  const filtered = clientes.filter(c =>
-    !term || FIELDS.some(f => (c[f.key]||'').toLowerCase().includes(term))
-  );
-  const list = document.getElementById('list');
+  renderFilters();
 
+  let filtered = clientes.filter(c => currentFilter === 'todos' || c.modalidade === currentFilter);
+  filtered = filtered.filter(c => !term || ALL_KEYS.some(k => (c[k]||'').toLowerCase().includes(term)));
+
+  const list = document.getElementById('list');
   document.getElementById('count').innerHTML =
     `<b>${clientes.length}</b> ${clientes.length === 1 ? 'cliente' : 'clientes'}` +
     (term ? ` · ${filtered.length} encontrado(s)` : '');
@@ -346,17 +365,21 @@ function render(){
     return;
   }
   if(filtered.length === 0){
-    list.innerHTML = emptyState('Nenhum resultado', 'Nenhum cliente corresponde à sua busca.', '');
+    list.innerHTML = emptyState('Nenhum resultado', 'Nenhum cliente corresponde a este filtro ou busca.', '');
     return;
   }
 
   list.innerHTML = filtered.map(c => {
-    const fieldsHtml = FIELDS.filter(f => f.key !== 'nome' && c[f.key])
-      .map(f => `<div class="fld"><span class="k">${f.label}</span><span class="v">${esc(c[f.key])}</span></div>`).join('');
+    const mod = MODALIDADES[c.modalidade] || MODALIDADES.excursao;
+    const fieldsHtml = mod.fields.filter(k => k !== 'nome' && c[k])
+      .map(k => `<div class="fld"><span class="k">${FIELD_META[k].label}</span><span class="v">${esc(c[k])}</span></div>`).join('');
     return `
     <div class="card">
       <div class="card-body">
-        <div class="card-name">${esc(c.nome) || '(sem nome)'}</div>
+        <div class="card-top">
+          <span class="badge ${c.modalidade}">${mod.label}</span>
+          <span class="card-name">${esc(c.nome) || '(sem nome)'}</span>
+        </div>
         <div class="card-fields">${fieldsHtml}</div>
       </div>
       <div class="card-actions">
@@ -378,6 +401,18 @@ function render(){
     </div>`;
   }).join('');
 }
+
+function renderFilters(){
+  const box = document.getElementById('filters');
+  if(clientes.length === 0){ box.innerHTML = ''; return; }
+  const counts = {todos: clientes.length};
+  Object.keys(MODALIDADES).forEach(k => counts[k] = clientes.filter(c => c.modalidade === k).length);
+  const chips = [['todos','Todos']].concat(Object.entries(MODALIDADES).map(([k,m]) => [k, m.label]));
+  box.innerHTML = chips.map(([k,lbl]) =>
+    `<button class="chip${currentFilter===k?' active':''}" onclick="setFilter('${k}')">${lbl} <span>${counts[k]||0}</span></button>`
+  ).join('');
+}
+function setFilter(f){ currentFilter = f; render(); }
 
 function emptyState(title, text, action){
   return `<div class="empty">
@@ -411,27 +446,63 @@ function copyText(text){
 }
 
 /* ---------- Editor ---------- */
+function fieldHtml(key, val){
+  const m = FIELD_META[key];
+  const full = (key === 'nome' || m.full) ? ' full' : '';
+  return `<div class="field${full}"><label for="f_${key}">${m.label}</label>
+    <input id="f_${key}" type="text" ${m.phone?'inputmode="numeric" ':''}placeholder="${m.ph||''}" value="${esc(val||'')}" autocomplete="off"></div>`;
+}
+function buildSeg(active){
+  document.getElementById('modSeg').innerHTML = Object.entries(MODALIDADES).map(([k,m]) =>
+    `<button type="button" class="${k===active?'active':''}" onclick="switchMod('${k}')">${m.label}</button>`
+  ).join('');
+}
+function buildFields(mod, vals){
+  vals = vals || {};
+  const fields = MODALIDADES[mod].fields;
+  const nome = fieldHtml('nome', vals.nome);
+  const rest = fields.filter(k => k !== 'nome').map(k => fieldHtml(k, vals[k])).join('');
+  document.getElementById('editorFields').innerHTML = nome + '<div class="grid2">' + rest + '</div>';
+  const tel = document.getElementById('f_telefone');
+  if(tel) tel.addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+}
+function readFields(){
+  const v = {};
+  ALL_KEYS.forEach(k => { const el = document.getElementById('f_'+k); if(el) v[k] = el.value; });
+  return v;
+}
+function switchMod(mod){
+  const vals = readFields();
+  editorMod = mod;
+  buildSeg(mod);
+  buildFields(mod, vals);
+}
 function openEditor(id){
   editingId = id || null;
   const c = id ? clientes.find(x => x.id === id) : blank();
-  FIELDS.forEach(f => document.getElementById('f_'+f.key).value = c[f.key] || '');
+  editorMod = (id ? c.modalidade : lastModalidade) || 'excursao';
+  buildSeg(editorMod);
+  buildFields(editorMod, c);
   document.getElementById('editorTitle').textContent = id ? 'Editar cliente' : 'Adicionar cliente';
   show('editorOverlay');
-  setTimeout(() => document.getElementById('f_nome').focus(), 60);
+  setTimeout(() => { const n = document.getElementById('f_nome'); if(n) n.focus(); }, 60);
 }
 function closeEditor(){ hide('editorOverlay'); editingId = null; }
 function saveClient(){
-  const data = {};
-  FIELDS.forEach(f => data[f.key] = document.getElementById('f_'+f.key).value.trim());
-  if(!data.nome){ toast('Digite o nome do cliente', true); document.getElementById('f_nome').focus(); return; }
+  const vals = readFields();
+  const nome = (vals.nome || '').trim();
+  if(!nome){ toast('Digite o nome do cliente', true); const n = document.getElementById('f_nome'); if(n) n.focus(); return; }
+  const data = {modalidade: editorMod};
+  MODALIDADES[editorMod].fields.forEach(k => data[k] = (vals[k]||'').trim());
   if(editingId){
     const c = clientes.find(x => x.id === editingId);
-    if(c) Object.assign(c, data);
+    if(c) Object.assign(c, blank(), {id:c.id}, data);
     toast('Cliente atualizado');
   }else{
     clientes.unshift(Object.assign(blank(), data));
     toast('Cliente adicionado');
   }
+  lastModalidade = editorMod;
   save(); render(); closeEditor();
 }
 
@@ -449,7 +520,7 @@ function confirmDelete(){
 }
 
 /* ---------- Import ---------- */
-const IMPORT_MAP = {nome:'nome',telefone:'telefone',fone:'telefone',cidade:'cidade',excursao:'excursao',setor:'setor',vaga:'vaga'};
+const IMPORT_MAP = {nome:'nome',telefone:'telefone',fone:'telefone',cidade:'cidade',excursao:'excursao',setor:'setor',vaga:'vaga',rua:'rua',box:'box',bloco:'bloco',loja:'loja'};
 function normLabel(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,''); }
 function parseLine(raw){
   const m = raw.match(/^([A-Za-zÀ-ÿ ]+?)\s*[:()\-]+\s*(.*)$/) || raw.match(/^([A-Za-zÀ-ÿ]+)\s+(.*)$/);
@@ -458,20 +529,27 @@ function parseLine(raw){
   if(!key) return null;
   return {key, value: m[2].replace(/^[)\s]+/,'').trim()};
 }
+function detectMod(c){
+  if(c.box || c.rua) return 'box';
+  if(c.bloco || c.loja) return 'bloco';
+  return 'excursao';
+}
 function parseImport(text){
-  return text.split(/\n\s*\n/).map(block => {
-    const c = blank();
-    let firstUnlabeled = null, any = false;
-    block.split('\n').forEach(line => {
-      const raw = line.trim();
-      if(!raw) return;
-      const p = parseLine(raw);
-      if(p){ c[p.key] = p.value; any = true; }
-      else if(firstUnlabeled === null){ firstUnlabeled = raw; }
-    });
-    if(!c.nome && firstUnlabeled){ c.nome = firstUnlabeled; any = true; }
-    return any ? c : null;
-  }).filter(Boolean);
+  const lines = text.split('\n');
+  const out = [];
+  let cur = null, any = false;
+  function push(){ if(cur && any){ cur.modalidade = detectMod(cur); out.push(cur); } }
+  lines.forEach(line => {
+    const raw = line.trim();
+    if(!raw || raw === '-') return;
+    const p = parseLine(raw);
+    if(p && p.key === 'nome'){ push(); cur = blank(); any = true; cur.nome = p.value; return; }
+    if(!cur){ cur = blank(); any = true; }
+    if(p){ cur[p.key] = p.value; any = true; }
+    else if(!cur.nome){ cur.nome = raw; any = true; }
+  });
+  push();
+  return out;
 }
 function openImport(){
   document.getElementById('importText').value = '';
@@ -536,9 +614,6 @@ function toast(msg, isError){
 
 /* ---------- Events ---------- */
 document.getElementById('search').addEventListener('input', render);
-document.getElementById('f_telefone').addEventListener('input', e => {
-  e.target.value = maskPhone(e.target.value);
-});
 document.getElementById('importText').addEventListener('input', e => {
   const n = parseImport(e.target.value).length;
   document.getElementById('importPreview').textContent =
