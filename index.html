@@ -163,6 +163,21 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast svg{width:17px;height:17px;color:var(--success)}
 
+  /* ----- Gerenciador de Excursões ----- */
+  .exc-list{max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .exc-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}
+  .exc-fee{width:44px;height:40px;flex-shrink:0;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-weight:800;font-size:14px;display:inline-flex;align-items:center;justify-content:center;transition:.12s}
+  .exc-fee.lvl1{background:#16a34a;color:#fff;border-color:#16a34a}
+  .exc-fee.lvl2{background:#0f7a33;color:#fff;border-color:#0f7a33}
+  .exc-info{flex:1;min-width:0}
+  .exc-name{font-weight:700;font-size:14px;word-break:break-word}
+  .exc-meta{font-size:12px;color:var(--muted)}
+  .exc-fee-hint{font-size:12px;color:#16a34a;font-weight:700;margin-top:5px;min-height:14px}
+  .exc-search{position:relative;margin-bottom:6px}
+  .exc-search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--input-bg);color:var(--ink);outline:none}
+  .exc-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .exc-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted)}
+
   /* ----- Impressão / Etiqueta 10x15 ----- */
   .print-btn{width:100%;justify-content:center;background:var(--accent);color:#fff;padding:12px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:7px;transition:background .15s,transform .08s;box-shadow:var(--shadow)}
   .print-btn:hover{background:var(--accent-dark)}
@@ -250,6 +265,10 @@
     <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()" title="Restaurar de um arquivo de backup">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 9l5-5 5 5M12 4v12"/></svg>
       Restaurar
+    </button>
+    <button class="btn btn-ghost" onclick="openExcManager()" title="Editar excursões e taxas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Excursões
     </button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="restoreData(event)">
   </div>
@@ -368,6 +387,9 @@ const MODALIDADES = {
   bloco:    {label:'Bloco',    fields:['nome','telefone','setor','bloco','loja']},
 };
 const ALL_KEYS = Object.keys(FIELD_META);
+const EXC_DEFAULT = [{"n":"Abdon Turismo","s":"Laranja","v":"33","van":false},{"n":"Abobrinha Viagens","s":"Verde","v":"51","van":false},{"n":"ACVS Turismo","s":"Vermelho","v":"96","van":false},{"n":"ADR Receptivo","s":"Amarelo","v":"23","van":false},{"n":"Adriano Transportes","s":"Amarelo","v":"114A","van":false},{"n":"Adriano Tur","s":"Vermelho","v":"44","van":false},{"n":"AG Queiroz","s":"Verde","v":"97","van":false},{"n":"Aldenor Viagens","s":"Laranja","v":"99","van":true},{"n":"Aldenora Turismo","s":"Azul","v":"02/04","van":false},{"n":"Alex Viagens","s":"Laranja","v":"28/30","van":false},{"n":"Alexandre","s":"Branco","v":"91","van":false},{"n":"Alexandre Fortunato","s":"Verde","v":"77/78","van":false},{"n":"Ali Turismo (Sandrack)","s":"Amarelo","v":"45","van":false},{"n":"Alice Transportes","s":"Branco","v":"95","van":false},{"n":"Allan Fretante","s":"Vermelho","v":"63","van":true},{"n":"Alves Tur","s":"Laranja","v":"16","van":false},{"n":"AMS Transportes & Logística","s":"Laranja","v":"12","van":false},{"n":"Ana's Tur","s":"Laranja","v":"02/04","van":false},{"n":"Anderson Viagens","s":"Verde","v":"53","van":false},{"n":"Andrea Costa","s":"Verde","v":"79","van":false},{"n":"André - Rio Tinto","s":"Laranja","v":"121","van":false},{"n":"André Mazarope","s":"Azul","v":"137","van":false},{"n":"Arlan Tour","s":"Branco","v":"121","van":false},{"n":"ATF Turismo / Igor","s":"Vermelho","v":"70","van":false},{"n":"AWG Turismo","s":"Amarelo","v":"16","van":true},{"n":"Aécio Tur","s":"Branco","v":"91","van":false},{"n":"Bagaça Transportes","s":"","v":"10","van":false},{"n":"Baiano VIP","s":"Vermelho","v":"99","van":false},{"n":"Baiton Excursão","s":"Branco","v":"34","van":false},{"n":"Barreto Express","s":"Azul","v":"130","van":false},{"n":"Batista Viagens","s":"Vermelho","v":"88","van":false},{"n":"Belarmino Mendes","s":"Azul","v":"20","van":false},{"n":"Bento Turismo","s":"Laranja","v":"26","van":false},{"n":"Berel Excursão","s":"Branco","v":"126/128","van":false},{"n":"Beto Excursão (Guarabira)","s":"Azul","v":"115","van":false},{"n":"Beto Excursão (Natal)","s":"Vermelho","v":"64 A","van":false},{"n":"Bigode Turismo","s":"Branco","v":"111","van":false},{"n":"Biuzinho Turismo","s":"Amarelo","v":"46","van":false},{"n":"Box Tur","s":"Laranja","v":"28","van":false},{"n":"Bruna Transporte","s":"Vermelho","v":"55","van":false},{"n":"C&C Transportes","s":"Vermelho","v":"77","van":false},{"n":"Cabana Tur","s":"Verde","v":"84/86","van":false},{"n":"Cafuringa Turismo","s":"Amarelo","v":"116","van":false},{"n":"Carlinhos da Sulanca","s":"Azul","v":"26","van":false},{"n":"Carlos Viagens","s":"Vermelho","v":"58","van":false},{"n":"Carol Tur","s":"Vermelho","v":"80","van":false},{"n":"Carvalho Exscursão","s":"Azul","v":"108","van":false},{"n":"Cebola Viagens","s":"Vermelho","v":"83","van":false},{"n":"Cesar Tur","s":"Amarelo","v":"120","van":false},{"n":"CH Turismo","s":"Branco","v":"93","van":false},{"n":"Chico Dias","s":"Verde","v":"79","van":false},{"n":"Chiquinho Transportes","s":"Verde","v":"53/54","van":false},{"n":"Cipriano Tur","s":"Verde","v":"74","van":false},{"n":"Cllaf Logística","s":"Vermelho","v":"63/65","van":false},{"n":"Corrinha Turismo","s":"Laranja","v":"41A","van":false},{"n":"Cristiano Tur","s":"Amarelo","v":"131","van":false},{"n":"Cycy Turismo","s":"Vermelho","v":"49","van":false},{"n":"D'Nilton","s":"Amarelo","v":"99","van":false},{"n":"Dairlon","s":"Azul","v":"36","van":false},{"n":"Danda Turismo","s":"Verde","v":"73","van":false},{"n":"Danilo Turismo","s":"Laranja","v":"12","van":false},{"n":"Danturismo","s":"Verde","v":"84","van":false},{"n":"David Excursões","s":"Branco","v":"19/20","van":false},{"n":"Daví Turismo","s":"Azul","v":"32","van":false},{"n":"Day Turismo","s":"Azul","v":"08","van":false},{"n":"Dege Tur","s":"Verde","v":"72","van":false},{"n":"Denilson Transportes","s":"Laranja","v":"02","van":false},{"n":"Dervânia Tur","s":"Branco","v":"134","van":false},{"n":"Deyse Viagens","s":"Amarelo","v":"138/140","van":false},{"n":"DF Turismo","s":"Amarelo","v":"135/137","van":false},{"n":"Dielson / Alexandra","s":"Azul","v":"112","van":false},{"n":"Dinho Turismo","s":"Branco","v":"105","van":false},{"n":"DL Turismo","s":"Laranja","v":"17","van":false},{"n":"Dois Irmãos Turismo","s":"Amarelo","v":"114","van":false},{"n":"Dona Suely","s":"Branco","v":"38","van":false},{"n":"Donato Viagens","s":"Amarelo","v":"31","van":false},{"n":"Durval Tur","s":"Vermelho","v":"58,58","van":false},{"n":"Dé Turismo","s":"Azul","v":"40","van":false},{"n":"Ebenezer","s":"Laranja","v":"23/25","van":false},{"n":"EIF Viagens e Receptivo (Fred)","s":"Branco","v":"29","van":false},{"n":"Elma Tur","s":"Vermelho","v":"60","van":false},{"n":"Ely Turismo","s":"Amarelo","v":"94/96","van":false},{"n":"Emílio Tur","s":"Azul","v":"31","van":false},{"n":"Enaide Viagens","s":"Vermelho","v":"76","van":false},{"n":"Encomendas Tur","s":"Azul","v":"104","van":false},{"n":"Enoque Viagens","s":"Branco","v":"07/08","van":false},{"n":"ER Turismo","s":"Laranja","v":"10","van":false},{"n":"Erivan","s":"Amarelo","v":"21","van":false},{"n":"Ernesto Veneiorão","s":"Verde","v":"80","van":true},{"n":"Essencial (Djavan)","s":"Vermelho","v":"88 A","van":false},{"n":"Ester Excursões","s":"Vermelho","v":"44 A","van":false},{"n":"Estratégia Logística","s":"Amarelo","v":"107","van":false},{"n":"Estrela D'alva","s":"Laranja","v":"44","van":false},{"n":"Everaldo Tur","s":"Vermelho","v":"91","van":false},{"n":"Evolution Transporte","s":"Azul","v":"110","van":false},{"n":"Expresso do Vale","s":"Azul","v":"40","van":false},{"n":"Expresso Macêdo","s":"Laranja","v":"38","van":false},{"n":"Expresso Pará","s":"Branco","v":"36","van":false},{"n":"Ezonildo","s":"Vermelho","v":"59","van":false},{"n":"F&T Tur","s":"Vermelho","v":"54","van":false},{"n":"F.E Transporte","s":"Laranja","v":"03","van":false},{"n":"Fabinho Transportes","s":"Verde","v":"96","van":false},{"n":"Facol Logística","s":"Laranja","v":"01","van":false},{"n":"Felipe de Mossoró","s":"Branco","v":"24","van":false},{"n":"Felipe Viagens","s":"Azul","v":"134","van":false},{"n":"Fernando","s":"Verde","v":"58","van":false},{"n":"Fernando Excursão","s":"Branco","v":"01/02","van":false},{"n":"Fernando Henrique Transportadora","s":"Azul","v":"133","van":true},{"n":"Flaviano Torres","s":"Azul","v":"116","van":false},{"n":"Flavio Transportes","s":"Laranja","v":"141/142","van":false},{"n":"Flecha Azul Turismo","s":"Vermelho","v":"73","van":false},{"n":"FMA Express","s":"Azul","v":"136","van":false},{"n":"Formiga Transportes","s":"Laranja","v":"42","van":false},{"n":"Fox Tur","s":"Vermelho","v":"46","van":false},{"n":"Fran Turismo","s":"Branco","v":"138","van":false},{"n":"Francisco de Assis","s":"Amarelo","v":"06","van":false},{"n":"Francisquinho","s":"Laranja","v":"143/144","van":false},{"n":"Freitas Tur","s":"Branco","v":"124","van":false},{"n":"Fumação Turismo","s":"Vermelho","v":"59","van":false},{"n":"Fábio Excursão","s":"Vermelho","v":"64 B","van":false},{"n":"Fábio Viagens","s":"Laranja","v":"102","van":false},{"n":"Gabrielly Tur","s":"Branco","v":"102","van":false},{"n":"Galpão Transportes","s":"Azul","v":"06","van":false},{"n":"Gasparzinho","s":"Vermelho","v":"79/81/83/85/87/89","van":false},{"n":"GDN Transportes","s":"Vermelho","v":"78","van":false},{"n":"Gedron Viagens","s":"Branco","v":"118","van":false},{"n":"Genilson Viagens","s":"Vermelho","v":"71","van":true},{"n":"Geová Viagens","s":"Verde","v":"67/69","van":false},{"n":"Gil Entregas","s":"Laranja","v":"132/133","van":false},{"n":"Gilson Souza","s":"Verde","v":"81","van":false},{"n":"Ginal Tur","s":"Branco","v":"94","van":false},{"n":"Gordinha Turismo","s":"Amarelo","v":"126","van":false},{"n":"Gordinho das Encomendas","s":"Laranja","v":"127","van":false},{"n":"Gorete & Jonson","s":"Azul","v":"124","van":false},{"n":"Granpola Excursão","s":"Vermelho","v":"66,68","van":false},{"n":"Greew Transportes","s":"Azul","v":"15","van":false},{"n":"Grilo Turismo","s":"Branco","v":"37","van":false},{"n":"Grupo Cacauzinho","s":"Branco","v":"83A","van":false},{"n":"Grupo Eclipse","s":"Vermelho","v":"45","van":false},{"n":"Guardiato Turismo","s":"Vermelho","v":"86","van":false},{"n":"GV Viagens","s":"Amarelo","v":"12","van":false},{"n":"GV Viagens - Gilson","s":"Vermelho","v":"60/61","van":false},{"n":"Henrique Transporte","s":"Azul","v":"140","van":false},{"n":"Hyggor Tur","s":"Branco","v":"100","van":false},{"n":"Imperatur","s":"Branco","v":"109","van":false},{"n":"Iraildo Viagens","s":"Azul","v":"121","van":false},{"n":"Iraneide Viagens","s":"Branco","v":"114","van":false},{"n":"Iranildo","s":"Amarelo","v":"19","van":false},{"n":"Irmão Val - Excursão","s":"Vermelho","v":"66","van":true},{"n":"Israel Tur","s":"Verde","v":"66","van":true},{"n":"Ito Viagens","s":"Branco","v":"31","van":false},{"n":"Ivânio","s":"Verde","v":"71","van":false},{"n":"Izac Viagens","s":"Vermelho","v":"69","van":false},{"n":"J Quaresma","s":"","v":"133","van":false},{"n":"J Santos","s":"Azul","v":"43","van":false},{"n":"Jamstur","s":"Branco","v":"130","van":false},{"n":"Jan Táxi (O Rei das Encomendas)","s":"Laranja","v":"107","van":true},{"n":"Jandaia Logística","s":"Azul","v":"17/19","van":false},{"n":"JC Viagens","s":"Amarelo","v":"134/136","van":false},{"n":"JD Tur","s":"Laranja","v":"106","van":false},{"n":"JD Turismo","s":"Branco","v":"108","van":false},{"n":"JK Excursão - Rio Tinto","s":"Laranja","v":"122","van":false},{"n":"JKS Log Transportes","s":"Laranja","v":"118","van":true},{"n":"JM Transportes","s":"Amarelo","v":"108","van":false},{"n":"Joca Turismo","s":"Vermelho","v":"61","van":false},{"n":"Jonatas Turismo","s":"Amarelo","v":"06","van":false},{"n":"Jones Transportes","s":"Laranja","v":"14","van":false},{"n":"Josemar Viagens","s":"Amarelo","v":"49","van":false},{"n":"Josevaldo Viagens","s":"Azul","v":"39","van":false},{"n":"Josinelma Viagens","s":"Branco","v":"","van":false},{"n":"Josivaldo","s":"Amarelo","v":"51","van":false},{"n":"Josivan Viagens","s":"Laranja","v":"130/131","van":false},{"n":"João Sertanejo","s":"Vermelho","v":"72","van":false},{"n":"Joãozinho Turismo","s":"Verde","v":"90A","van":false},{"n":"JR Transporte","s":"Laranja","v":"04","van":false},{"n":"JS Excursões","s":"Laranja","v":"103","van":false},{"n":"JS Globo","s":"Branco","v":"133","van":false},{"n":"Junior da Baixada","s":"Branco","v":"136","van":false},{"n":"Junior Excursão","s":"Laranja","v":"113/114","van":false},{"n":"Junior Lotação","s":"Amarelo","v":"33","van":false},{"n":"Jó Turismo","s":"Vermelho","v":"86,88","van":false},{"n":"Júnior & Liliane Tur","s":"Amarelo","v":"25","van":true},{"n":"Júnior do táxi- Viagens e Encomendas","s":"Laranja","v":"104","van":false},{"n":"Júnior e Eliane","s":"Vermelho","v":"68","van":false},{"n":"Júnior Tur","s":"Branco","v":"44/45","van":false},{"n":"Júnior Turismo","s":"Vermelho","v":"50,52","van":false},{"n":"Júnior Viagens","s":"Vermelho","v":"82","van":false},{"n":"Kaká Turismo","s":"Azul","v":"140","van":false},{"n":"Kal Tour","s":"Laranja","v":"27/29","van":false},{"n":"Lapa Turismo","s":"Amarelo","v":"113","van":false},{"n":"Lari Tur","s":"Amarelo","v":"101","van":false},{"n":"LC Turismo e Transportes","s":"Azul","v":"05","van":false},{"n":"Leonardo Viagens","s":"Amarelo","v":"34","van":false},{"n":"Leão Transpostes","s":"Laranja","v":"108","van":false},{"n":"Li Tur","s":"Laranja","v":"35","van":false},{"n":"Lia Excursão","s":"Azul","v":"106","van":false},{"n":"Lince Transportes","s":"Azul","v":"03","van":false},{"n":"Lindomar Viagens","s":"Azul","v":"79","van":false},{"n":"Lino Excursão","s":"Azul","v":"129","van":false},{"n":"Lins Viagens","s":"Laranja","v":"139/140","van":false},{"n":"Litinho Excursão","s":"Verde","v":"71","van":false},{"n":"Locatur","s":"Amarelo","v":"44","van":false},{"n":"Louro Tur","s":"Vermelho","v":"84 A","van":false},{"n":"LR Eventos Viagens Turismo","s":"Verde","v":"68","van":true},{"n":"LR Transportes","s":"Azul","v":"27","van":false},{"n":"LR Turismo","s":"Branco","v":"106","van":false},{"n":"Lucas Tur","s":"Laranja","v":"40","van":false},{"n":"Luciano Excursão","s":"Azul","v":"131","van":true},{"n":"Luga Transporte","s":"Amarelo","v":"103","van":false},{"n":"Luz Divína","s":"Azul","v":"41","van":false},{"n":"LV Turismo","s":"Verde","v":"76/78","van":false},{"n":"LVC Tur","s":"Azul","v":"14","van":false},{"n":"Lêu Transportes","s":"Azul","v":"135","van":false},{"n":"M&F Excursão","s":"Amarelo","v":"118","van":false},{"n":"MA Logistica","s":"Branco","v":"91","van":false},{"n":"Mada Turismo","s":"Branco","v":"116","van":false},{"n":"Magalhães Transportes","s":"Azul","v":"33","van":false},{"n":"Mais Sonhos","s":"Amarelo","v":"104","van":false},{"n":"Mano Viagens","s":"Verde","v":"74","van":false},{"n":"Manoel Viagens","s":"Verde","v":"93","van":true},{"n":"Manuella Turismo","s":"Vermelho","v":"75","van":false},{"n":"Marcelo","s":"Amarelo","v":"42","van":false},{"n":"Marcelo Ceará","s":"Vermelho","v":"84","van":false},{"n":"Marcelo Costa Transporte","s":"Verde","v":"49","van":false},{"n":"Marcelo Tur","s":"Laranja","v":"13/15","van":false},{"n":"Marcondes Turismo","s":"Laranja","v":"145/146","van":false},{"n":"Marcos Transportes","s":"Laranja","v":"08","van":false},{"n":"Marcos Viagens","s":"Vermelho","v":"77","van":false},{"n":"Marlin Turismo","s":"Azul","v":"126","van":false},{"n":"Marquinhos Viagens","s":"Verde","v":"66","van":false},{"n":"Martins Tur","s":"Vermelho","v":"102","van":false},{"n":"Martins Viagens","s":"Azul","v":"118","van":false},{"n":"Mega Mix Tur","s":"Branco","v":"11","van":false},{"n":"Mendes Excursão","s":"Branco","v":"21","van":false},{"n":"Milena Excursão","s":"Vermelho","v":"82","van":false},{"n":"Minervina","s":"Verde","v":"51","van":false},{"n":"MP Turismo","s":"Verde","v":"47","van":false},{"n":"MS Turismo - Mariazinha","s":"Laranja","v":"115","van":false},{"n":"MS Viagens","s":"Verde","v":"68/70","van":false},{"n":"Márcio Tur","s":"Branco","v":"39","van":false},{"n":"N&D Transportes","s":"Vermelho","v":"70","van":true},{"n":"Nagibe Tur","s":"Azul","v":"38","van":false},{"n":"Nagilson Viagens","s":"Verde","v":"60","van":false},{"n":"Nal Viagens","s":"Branco","v":"43","van":true},{"n":"Naldo Viagens","s":"Azul","v":"128","van":false},{"n":"Naldo's Viagens","s":"Laranja","v":"147","van":false},{"n":"Nelson Encomendas","s":"Verde","v":"69","van":true},{"n":"Neno Turismo","s":"Amarelo","v":"38","van":false},{"n":"Nildo Tur","s":"Azul","v":"34","van":false},{"n":"Nivaldo Tosi","s":"Amarelo","v":"109","van":false},{"n":"Nordeste Tur","s":"Vermelho","v":"90","van":false},{"n":"Nova Jerusalém","s":"Verde","v":"88/90","van":false},{"n":"Nova Tour","s":"Verde","v":"61","van":false},{"n":"Noélia Excursão","s":"Branco","v":"85/87","van":false},{"n":"NR Turismo","s":"Laranja","v":"20/22","van":false},{"n":"NT Express Logística","s":"Branco","v":"06","van":false},{"n":"Nunes Transportes","s":"Laranja","v":"126","van":false},{"n":"O GRANDE Viagens & Turismo","s":"Laranja","v":"101","van":false},{"n":"Oberdan","s":"Azul","v":"20","van":false},{"n":"Odilon","s":"Branco","v":"97","van":false},{"n":"Oliveira Transporte","s":"Azul","v":"VAga 21/23","van":false},{"n":"Opará","s":"Amarelo","v":"41","van":false},{"n":"Orlando Transportes","s":"Branco","v":"113","van":false},{"n":"P & R Viagens","s":"Laranja","v":"00","van":false},{"n":"P&R","s":"Laranja","v":"00","van":false},{"n":"Paiano Transporte","s":"Azul","v":"12","van":false},{"n":"Papa Tur","s":"Branco","v":"132","van":false},{"n":"Papa-Léguas","s":"Verde","v":"50/52","van":false},{"n":"Passarinho","s":"Vermelho","v":"73","van":false},{"n":"Paulo - O Rei das Encomendas","s":"Branco","v":"15/16","van":false},{"n":"Paulo César","s":"Laranja","v":"86","van":false},{"n":"Paulo Viagens","s":"Azul","v":"127","van":false},{"n":"Pedro Guarabira","s":"Azul","v":"119","van":false},{"n":"Pedro Transportes","s":"Verde","v":"82","van":false},{"n":"Pedro Transportes e Encomendas","s":"Verde","v":"82","van":false},{"n":"Pepeu","s":"Verde","v":"75","van":false},{"n":"Pequeno Tansportes","s":"Laranja","v":"136/137","van":false},{"n":"Pingotur","s":"Azul","v":"31","van":false},{"n":"Portal Transporte","s":"Vermelho","v":"49","van":false},{"n":"PP Excursão","s":"Laranja","v":"119","van":false},{"n":"Preta Excursão","s":"Verde","v":"55/56","van":false},{"n":"Preto Tur","s":"Azul","v":"42","van":false},{"n":"Princípe Turismo","s":"Vermelho","v":"51/53","van":false},{"n":"Rafa Tour PE","s":"Vermelho","v":"85","van":true},{"n":"Rafa Tur","s":"Branco","v":"27","van":false},{"n":"Rafael e Jô","s":"Verde","v":"62","van":false},{"n":"Rafael Transportes","s":"Vermelho","v":"72","van":false},{"n":"Raimundo Neto","s":"Laranja","v":"34","van":false},{"n":"Raimundo Transportes","s":"Branco","v":"123/125","van":false},{"n":"Ranilson Viagens","s":"Laranja","v":"18","van":false},{"n":"Raudeck Viagens","s":"Branco","v":"14","van":false},{"n":"RB Transportes","s":"Branco","v":"115","van":false},{"n":"Realeza Turismo","s":"Azul","v":"37","van":false},{"n":"Redenção Turismo","s":"Amarelo","v":"13","van":false},{"n":"Renascer Viagens","s":"Azul","v":"39","van":false},{"n":"Ricardo Moura Transporetes","s":"Azul","v":"25","van":false},{"n":"Rildo Mororó","s":"Vermelho","v":"66","van":false},{"n":"Risetur Viagens","s":"Branco","v":"35","van":false},{"n":"Roberto Excursão","s":"Laranja","v":"134/135","van":false},{"n":"Roberto Jr Turismo","s":"Verde","v":"49","van":false},{"n":"Robson Viagens","s":"Vermelho","v":"101","van":false},{"n":"Rodrigo Viagens","s":"Branco","v":"03/04","van":false},{"n":"Rogerio Home Delivery","s":"Verde","v":"75/76","van":false},{"n":"Romário Viagens","s":"Laranja","v":"07","van":false},{"n":"Ronivon Transporte","s":"Laranja","v":"02","van":false},{"n":"Rosa Branca","s":"Verde","v":"48A","van":false},{"n":"Rosa Viagens","s":"Verde","v":"47","van":false},{"n":"Rosemário Tur","s":"Vermelho","v":"92 / 93","van":false},{"n":"Ruan Excursão","s":"Branco","v":"32","van":false},{"n":"Ruth Excursões","s":"Amarelo","v":"92","van":false},{"n":"Rápido Transportes","s":"Verde","v":"49","van":false},{"n":"Régis Viagens","s":"Verde","v":"59/61","van":false},{"n":"S&S Turismo","s":"Amarelo","v":"112","van":false},{"n":"S.E - Excursão","s":"Branco","v":"110","van":false},{"n":"Saldanha Turismo","s":"Laranja","v":"24","van":false},{"n":"Sales Emcomendas","s":"Laranja","v":"89","van":false},{"n":"Salmo 40","s":"Amarelo","v":"15","van":false},{"n":"Samara & Pedro Excursão","s":"Azul","v":"123","van":false},{"n":"Sambus","s":"Vermelho","v":"47","van":false},{"n":"Sandra Turismo","s":"Verde","v":"56/58","van":false},{"n":"Santana Tur","s":"Amarelo","v":"106","van":false},{"n":"Santos Tur","s":"Azul","v":"22,24","van":false},{"n":"Seg Log","s":"Laranja","v":"98","van":false},{"n":"Severino Tur","s":"Verde","v":"63","van":false},{"n":"Sheyla Viagens","s":"Verde","v":"45","van":false},{"n":"Sidney Turismo","s":"Laranja","v":"46","van":false},{"n":"Silva Tur","s":"Branco","v":"119","van":false},{"n":"Silvania & Carlinhos Turismo","s":"Verde","v":"54","van":false},{"n":"Simão Turismo","s":"Amarelo","v":"128","van":false},{"n":"Sinval Tur","s":"Vermelho","v":"62","van":false},{"n":"Sirley Turismo","s":"Laranja","v":"37","van":false},{"n":"Sisal Tur","s":"Verde","v":"83","van":false},{"n":"SM Transportes","s":"Branco","v":"144","van":false},{"n":"SN Viagens","s":"Branco","v":"89","van":false},{"n":"Socorro Turismo","s":"Verde","v":"45","van":false},{"n":"Sr. Chico Viagens","s":"Amarelo","v":"29","van":false},{"n":"Suênio Viagens","s":"Branco","v":"28","van":false},{"n":"Sérgio Carvalho - Coleta e Entregas","s":"Laranja","v":"116","van":false},{"n":"Tagitur","s":"Branco","v":"120/122","van":false},{"n":"Taty Tur","s":"Amarelo","v":"100","van":false},{"n":"Thiago Transporte","s":"Laranja","v":"112","van":false},{"n":"Tião Viagens","s":"Amarelo","v":"54","van":false},{"n":"Toinho da Van","s":"Amarelo","v":"53","van":false},{"n":"Tom Viagens","s":"Verde","v":"60","van":false},{"n":"Trans Capelão","s":"Verde","v":"85","van":false},{"n":"Trans Costa","s":"Amarelo","v":"98","van":false},{"n":"Trans Junior","s":"Branco","v":"96/98","van":false},{"n":"Trans Lauren","s":"Amarelo","v":"111","van":false},{"n":"Trans Ribeiro","s":"Laranja","v":"41","van":false},{"n":"Translog","s":"Branco","v":"142","van":false},{"n":"Transmarques","s":"Amarelo","v":"27","van":false},{"n":"Transmedeiros (Erivan)","s":"Azul","v":"139","van":false},{"n":"Transpires","s":"Verde","v":"82","van":false},{"n":"Tropical Tur","s":"Branco","v":"104","van":false},{"n":"União Tur","s":"Verde","v":"80","van":false},{"n":"Val Tur","s":"Vermelho","v":"71","van":false},{"n":"Van do Gago","s":"Amarelo","v":"8","van":false},{"n":"Velox Transporte","s":"Laranja","v":"11","van":false},{"n":"Veronice Turismo","s":"Amarelo","v":"100","van":false},{"n":"Via Direta Turismo","s":"Vermelho","v":"81","van":false},{"n":"Via Monte Viagens","s":"Vermelho","v":"76","van":false},{"n":"Vila Turismo","s":"Branco","v":"137","van":false},{"n":"Viviane Bispo Viagens","s":"Vermelho","v":"103","van":false},{"n":"Vânia Turismo","s":"Branco","v":"135","van":false},{"n":"Véi Excursão","s":"Verde","v":"42","van":true},{"n":"W.D. TRANSPORTE E ACESSÓRIA","s":"Amarelo","v":"130","van":false},{"n":"Wallace Tur","s":"Amarelo","v":"01","van":false},{"n":"Washington Tur / Rawa Transportes","s":"Laranja","v":"01/03/05/07/09","van":false},{"n":"Welligton Tur","s":"Verde","v":"62","van":false},{"n":"WN Transportes","s":"Amarelo","v":"105","van":false},{"n":"Xavier Tur","s":"Verde","v":"64","van":false},{"n":"Zanchecttur","s":"Azul","v":"16,018","van":false},{"n":"Zeca Tur","s":"Amarelo","v":"48","van":false},{"n":"Zezinho Excursão","s":"Branco","v":"41","van":false},{"n":"Zito Galego Viagens","s":"Azul","v":"114","van":false},{"n":"Zé Cardoso Turismo","s":"Verde","v":"81","van":false},{"n":"Zé Maria Transportes","s":"Branco","v":"","van":false},{"n":"Zé Pereira Turismo","s":"Verde","v":"92","van":false},{"n":"Índio Viagens","s":"Branco","v":"112","van":false},{"n":"Índya Tur","s":"Amarelo","v":"127","van":false}];
+let excursoes = [];
+let EXC_BY_NAME = {};
 
 let clientes = [];
 let editingId = null;
@@ -583,8 +605,10 @@ function doPrint(){
 function fieldHtml(key, val){
   const m = FIELD_META[key];
   const full = (key === 'nome' || m.full) ? ' full' : '';
+  const list = key === 'excursao' ? ' list="excList"' : '';
+  const hint = key === 'excursao' ? '<div class="exc-fee-hint" id="excFeeHint"></div>' : '';
   return `<div class="field${full}"><label for="f_${key}">${m.label}</label>
-    <input id="f_${key}" type="text" ${m.phone?'inputmode="numeric" ':''}placeholder="${m.ph||''}" value="${esc(val||'')}" autocomplete="off"></div>`;
+    <input id="f_${key}"${list} type="text" ${m.phone?'inputmode="numeric" ':''}placeholder="${m.ph||''}" value="${esc(val||'')}" autocomplete="off">${hint}</div>`;
 }
 function buildSeg(active){
   document.getElementById('modSeg').innerHTML = Object.entries(MODALIDADES).map(([k,m]) =>
@@ -603,6 +627,24 @@ function buildFields(mod, vals){
   document.getElementById('editorFields').innerHTML = nome + '<div class="grid2">' + rest + '</div>';
   const tel = document.getElementById('f_telefone');
   if(tel) tel.addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+  const exc = document.getElementById('f_excursao');
+  function updExcHint(name){
+    const hit = EXC_BY_NAME[(name||'').trim().toLowerCase()];
+    const h = document.getElementById('excFeeHint');
+    if(h) h.textContent = hit && hit.fee ? ('Cobra taxa ' + hit.fee) : '';
+    return hit;
+  }
+  if(exc){
+    exc.addEventListener('input', e => {
+      const hit = updExcHint(e.target.value);
+      if(hit){
+        const s = document.getElementById('f_setor'); if(s) s.value = hit.s;
+        const vg = document.getElementById('f_vaga');  if(vg) vg.value = hit.v;
+        setVeiculo(hit.van ? 'van' : 'onibus');
+      }
+    });
+    updExcHint(exc.value);
+  }
 }
 function veiculoToggleHtml(v){
   editorVeiculo = v;
@@ -718,6 +760,74 @@ function confirmImport(){
   toast(`${parsed.length} cliente(s) importado(s)`);
 }
 
+/* ---------- Gerenciador de Excursões ---------- */
+function loadExc(){
+  let data = null;
+  try{ const raw = localStorage.getItem('enderecos_excursoes'); data = raw ? JSON.parse(raw) : null; }catch(e){ data = null; }
+  if(!data) data = EXC_DEFAULT.map(e => ({id:uid(), n:e.n, s:e.s, v:e.v, van:!!e.van, fee:''}));
+  excursoes = data.map(e => ({id:e.id||uid(), n:e.n||'', s:e.s||'', v:e.v||'', van:!!e.van, fee:e.fee||''}));
+  rebuildExcIndex();
+}
+function saveExc(){ try{ localStorage.setItem('enderecos_excursoes', JSON.stringify(excursoes)); }catch(e){} rebuildExcIndex(); }
+function rebuildExcIndex(){
+  EXC_BY_NAME = {};
+  excursoes.forEach(e => EXC_BY_NAME[e.n.toLowerCase()] = e);
+  const dl = document.getElementById('excList');
+  if(dl) dl.innerHTML = excursoes.map(e => `<option value="${esc(e.n)}"></option>`).join('');
+}
+function openExcManager(){ document.getElementById('excSearch').value=''; renderExcManager(); show('excManagerOverlay'); }
+function renderExcManager(){
+  const term = (document.getElementById('excSearch').value||'').trim().toLowerCase();
+  const list = excursoes.filter(e => !term || e.n.toLowerCase().includes(term) || (e.s||'').toLowerCase().includes(term));
+  const box = document.getElementById('excListBox');
+  document.getElementById('excCount').textContent = `${excursoes.length} excursões`;
+  if(list.length===0){ box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:28px">Nenhuma excursão encontrada.</div>'; return; }
+  box.innerHTML = list.map(e => {
+    const lvl = e.fee==='$$'?2:(e.fee==='$'?1:0);
+    const feeLabel = lvl===0?'—':(lvl===1?'$':'$$');
+    return `<div class="exc-row">
+      <button class="exc-fee lvl${lvl}" onclick="cycleFee('${e.id}')" title="Marcar taxa">${feeLabel}</button>
+      <div class="exc-info"><div class="exc-name">${esc(e.n)}</div>
+        <div class="exc-meta">${esc(e.s||'—')}${e.v?(' · Vaga '+esc(e.v)):''}${e.van?' · Van':''}</div></div>
+      <button class="mini" onclick="openExcEdit('${e.id}')" title="Editar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+function cycleFee(id){
+  const e = excursoes.find(x=>x.id===id); if(!e) return;
+  e.fee = e.fee==='' ? '$' : (e.fee==='$' ? '$$' : '');
+  saveExc(); renderExcManager();
+}
+let excEditingId=null, exVeic='onibus', exFee='';
+function openExcEdit(id){
+  excEditingId = id || null;
+  const e = id ? excursoes.find(x=>x.id===id) : {n:'',s:'',v:'',van:false,fee:''};
+  document.getElementById('excEditTitle').textContent = id ? 'Editar excursão' : 'Nova excursão';
+  document.getElementById('ex_n').value = e.n||'';
+  document.getElementById('ex_s').value = e.s||'';
+  document.getElementById('ex_v').value = e.v||'';
+  exSetVeic(e.van ? 'van':'onibus'); exSetFee(e.fee||'');
+  document.getElementById('excDelBtn').style.display = id ? '' : 'none';
+  show('excEditOverlay');
+}
+function exSetVeic(v){ exVeic=v; document.querySelectorAll('#exVeicSeg button').forEach(b=>b.classList.toggle('active',b.dataset.v===v)); }
+function exSetFee(f){ exFee=f; document.querySelectorAll('#exFeeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.f===f)); }
+function saveExcEdit(){
+  const n=document.getElementById('ex_n').value.trim();
+  if(!n){ toast('Digite o nome da excursão', true); return; }
+  const data={n, s:document.getElementById('ex_s').value.trim(), v:document.getElementById('ex_v').value.trim(), van:exVeic==='van', fee:exFee};
+  if(excEditingId){ const e=excursoes.find(x=>x.id===excEditingId); if(e) Object.assign(e,data); toast('Excursão atualizada'); }
+  else { excursoes.unshift(Object.assign({id:uid()},data)); toast('Excursão adicionada'); }
+  saveExc(); renderExcManager(); hide('excEditOverlay');
+}
+function delExc(){
+  if(!excEditingId) return;
+  excursoes = excursoes.filter(x=>x.id!==excEditingId);
+  saveExc(); renderExcManager(); hide('excEditOverlay'); toast('Excursão removida');
+}
+
 /* ---------- Backup / Restore ---------- */
 function exportData(){
   if(clientes.length === 0){ toast('Não há clientes para salvar', true); return; }
@@ -766,13 +876,14 @@ function toast(msg, isError){
 
 /* ---------- Events ---------- */
 document.getElementById('search').addEventListener('input', render);
+document.getElementById('excSearch').addEventListener('input', renderExcManager);
 document.getElementById('importText').addEventListener('input', e => {
   const n = parseImport(e.target.value).length;
   document.getElementById('importPreview').textContent =
     n === 0 ? 'Nenhum cliente detectado ainda.' : `${n} cliente(s) detectado(s).`;
 });
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ ['editorOverlay','deleteOverlay','importOverlay','printOverlay'].forEach(hide); }
+  if(e.key === 'Escape'){ ['editorOverlay','deleteOverlay','importOverlay','printOverlay','excManagerOverlay','excEditOverlay'].forEach(hide); }
 });
 window.addEventListener('afterprint', () => { const p = document.getElementById('printArea'); if(p) p.innerHTML = ''; });
 document.querySelectorAll('.overlay').forEach(o => {
@@ -781,6 +892,7 @@ document.querySelectorAll('.overlay').forEach(o => {
 
 /* ---------- Init ---------- */
 load();
+loadExc();
 render();
 
 /* ---------- Service Worker ---------- */
@@ -790,6 +902,64 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<!-- Excursões manager modal -->
+<div class="overlay" id="excManagerOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <h2>Excursões</h2>
+      <p>Toque no botão de taxa ($ / $$) ou edite os dados de cada excursão. <span id="excCount"></span></p>
+    </div>
+    <div class="modal-body">
+      <div class="exc-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="excSearch" type="text" placeholder="Buscar excursão..." autocomplete="off">
+      </div>
+      <div id="excListBox" class="exc-list"></div>
+    </div>
+    <div class="modal-foot between">
+      <button class="btn btn-ghost" onclick="hide('excManagerOverlay')">Fechar</button>
+      <button class="btn btn-primary" onclick="openExcEdit()">Adicionar excursão</button>
+    </div>
+  </div>
+</div>
+
+<!-- Excursão edit modal -->
+<div class="overlay" id="excEditOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><h2 id="excEditTitle">Editar excursão</h2></div>
+    <div class="modal-body">
+      <div class="field"><label for="ex_n">Nome</label><input id="ex_n" type="text" autocomplete="off"></div>
+      <div class="grid2">
+        <div class="field"><label for="ex_s">Setor</label><input id="ex_s" type="text" autocomplete="off"></div>
+        <div class="field"><label for="ex_v">Vaga</label><input id="ex_v" type="text" autocomplete="off"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Veículo</label>
+          <div class="veic-seg" id="exVeicSeg">
+            <button type="button" data-v="onibus" onclick="exSetVeic('onibus')">Ônibus</button>
+            <button type="button" data-v="van" onclick="exSetVeic('van')">Van</button>
+          </div>
+        </div>
+        <div class="field"><label>Taxa</label>
+          <div class="veic-seg" id="exFeeSeg">
+            <button type="button" data-f="" onclick="exSetFee('')">Sem</button>
+            <button type="button" data-f="$" onclick="exSetFee('$')">$</button>
+            <button type="button" data-f="$$" onclick="exSetFee('$$')">$$</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot between">
+      <button class="btn btn-danger" id="excDelBtn" onclick="delExc()">Excluir</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="hide('excEditOverlay')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveExcEdit()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<datalist id="excList"></datalist>
 <div id="printArea"></div>
 </body>
 </html>
