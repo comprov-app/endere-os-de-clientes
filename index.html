@@ -874,32 +874,35 @@ function toast(msg, isError){
   toastTimer = setTimeout(() => t.classList.remove('show'), 1700);
 }
 
-/* ---------- Events ---------- */
-document.getElementById('search').addEventListener('input', render);
-document.getElementById('excSearch').addEventListener('input', renderExcManager);
-document.getElementById('importText').addEventListener('input', e => {
-  const n = parseImport(e.target.value).length;
-  document.getElementById('importPreview').textContent =
-    n === 0 ? 'Nenhum cliente detectado ainda.' : `${n} cliente(s) detectado(s).`;
-});
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ ['editorOverlay','deleteOverlay','importOverlay','printOverlay','excManagerOverlay','excEditOverlay'].forEach(hide); }
-});
-window.addEventListener('afterprint', () => { const p = document.getElementById('printArea'); if(p) p.innerHTML = ''; });
-document.querySelectorAll('.overlay').forEach(o => {
-  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('show'); });
-});
-
-/* ---------- Init ---------- */
-load();
-loadExc();
-render();
-
-/* ---------- Service Worker ---------- */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW falhou:', err));
+/* ---------- Events + Init ---------- */
+function initApp(){
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('excSearch').addEventListener('input', renderExcManager);
+  document.getElementById('importText').addEventListener('input', e => {
+    const n = parseImport(e.target.value).length;
+    document.getElementById('importPreview').textContent =
+      n === 0 ? 'Nenhum cliente detectado ainda.' : `${n} cliente(s) detectado(s).`;
   });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ ['editorOverlay','deleteOverlay','importOverlay','printOverlay','excManagerOverlay','excEditOverlay'].forEach(hide); }
+  });
+  window.addEventListener('afterprint', () => { const p = document.getElementById('printArea'); if(p) p.innerHTML = ''; });
+  document.querySelectorAll('.overlay').forEach(o => {
+    o.addEventListener('click', e => { if(e.target === o) o.classList.remove('show'); });
+  });
+  load();
+  loadExc();
+  render();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
+else initApp();
+
+/* ---------- Limpeza: remove service worker e caches antigos ---------- */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(()=>{});
+}
+if (window.caches && caches.keys) {
+  caches.keys().then(ks => ks.forEach(k => caches.delete(k))).catch(()=>{});
 }
 </script>
 <!-- Excursões manager modal -->
