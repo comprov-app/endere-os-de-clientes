@@ -338,13 +338,18 @@
   <div class="modal">
     <div class="modal-head">
       <h2>Imprimir etiqueta</h2>
-      <p>Confira a etiqueta. O PAGO você liga aqui antes de imprimir.</p>
+      <p>Confira a etiqueta. O PAGO e a taxa você liga aqui antes de imprimir.</p>
     </div>
     <div class="modal-body">
       <div class="pago-pick" id="pagoPick">
         <button onclick="setPago('none')">Sem PAGO</button>
         <button onclick="setPago('normal')">PAGO</button>
         <button onclick="setPago('preto')">PAGO preto</button>
+      </div>
+      <div class="pago-pick" id="taxaPick" style="margin-top:8px">
+        <button onclick="setTaxa('none')">Sem taxa</button>
+        <button onclick="setTaxa('$')">$</button>
+        <button onclick="setTaxa('$$')">$$</button>
       </div>
       <div class="label-scale">
         <div class="label-box"><div id="labelHost"></div></div>
@@ -559,6 +564,10 @@ function buildLabel(c){
     head += `<rect x="105" y="12.5" width="42" height="18" rx="1.8" fill="${box}" stroke="#000" stroke-width="0.8"/>`;
     head += `<text x="126" y="25.8" fill="${tc}" font-size="10.5" font-weight="900" text-anchor="middle">PAGO</text>`;
   }
+  if(c.taxa && c.taxa !== 'none'){
+    const fs = c.taxa === '$$' ? 9 : 11;
+    head += `<text x="142" y="92" fill="#000" font-size="${fs}" font-weight="900" text-anchor="end">${c.taxa}</text>`;
+  }
   const fx = border ? 8 : 7;
   const yTop = 37, yBot = border ? 95 : 97, n = mod.fields.length, slot = (yBot - yTop) / n;
   let fields = '';
@@ -579,12 +588,19 @@ function renderLabel(c){
   const states = ['none','normal','preto'];
   document.querySelectorAll('#pagoPick button').forEach((b,i) =>
     b.classList.toggle('active', states[i] === (c.pago||'none')));
+  const tstates = ['none','$','$$'];
+  document.querySelectorAll('#taxaPick button').forEach((b,i) =>
+    b.classList.toggle('active', tstates[i] === (c.taxa||'none')));
 }
 function openPrint(id){
   printingId = id;
   const c = clientes.find(x => x.id === id);
   if(!c) return;
   if(!c.pago) c.pago = 'none';
+  if(c.taxa === undefined){
+    const ex = EXC_BY_NAME[(c.excursao||'').trim().toLowerCase()];
+    c.taxa = (ex && ex.fee) ? ex.fee : 'none';
+  }
   renderLabel(c);
   show('printOverlay');
 }
@@ -593,6 +609,11 @@ function setPago(state){
   const c = clientes.find(x => x.id === printingId);
   if(!c) return;
   c.pago = state; save(); renderLabel(c);
+}
+function setTaxa(state){
+  const c = clientes.find(x => x.id === printingId);
+  if(!c) return;
+  c.taxa = state; save(); renderLabel(c);
 }
 function doPrint(){
   const c = clientes.find(x => x.id === printingId);
