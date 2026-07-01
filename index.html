@@ -61,9 +61,13 @@
   .brand span{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.02em}
 
   .search{flex:1;min-width:180px;position:relative}
-  .search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--input-bg);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+  .search input{width:100%;padding:10px 34px 10px 38px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--input-bg);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
   .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted)}
+  .search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;align-items:center;justify-content:center;background:none;border:none;color:var(--muted);cursor:pointer;padding:5px;border-radius:7px}
+  .search-clear svg{position:static;transform:none;width:15px;height:15px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+  .search-clear.show{display:inline-flex}
+  .search-clear:hover{color:var(--ink);background:var(--surface)}
 
   .icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,border-color .15s}
   .icon-btn:hover{background:var(--surface-hover);border-color:var(--accent)}
@@ -239,6 +243,7 @@
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="search" type="text" placeholder="Buscar por nome, cidade, setor..." autocomplete="off">
+      <button id="searchClear" class="search-clear" onclick="clearSearch()" aria-label="Limpar busca" title="Limpar busca"><svg viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <button class="icon-btn" onclick="toggleTheme()" title="Alternar modo noturno" aria-label="Alternar modo noturno">
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -630,9 +635,8 @@ function fieldHtml(key, val){
   const m = FIELD_META[key];
   const full = (key === 'nome' || m.full) ? ' full' : '';
   const list = key === 'excursao' ? ' list="excList"' : '';
-  const hint = key === 'excursao' ? '<div class="exc-fee-hint" id="excFeeHint"></div>' : '';
   return `<div class="field${full}"><label for="f_${key}">${m.label}</label>
-    <input id="f_${key}"${list} type="text" ${m.phone?'inputmode="numeric" ':''}placeholder="${m.ph||''}" value="${esc(val||'')}" autocomplete="off">${hint}</div>`;
+    <input id="f_${key}"${list} type="text" ${m.phone?'inputmode="numeric" ':''}placeholder="${m.ph||''}" value="${esc(val||'')}" autocomplete="off"></div>`;
 }
 function buildSeg(active){
   document.getElementById('modSeg').innerHTML = Object.entries(MODALIDADES).map(([k,m]) =>
@@ -652,22 +656,15 @@ function buildFields(mod, vals){
   const tel = document.getElementById('f_telefone');
   if(tel) tel.addEventListener('input', e => e.target.value = maskPhone(e.target.value));
   const exc = document.getElementById('f_excursao');
-  function updExcHint(name){
-    const hit = EXC_BY_NAME[(name||'').trim().toLowerCase()];
-    const h = document.getElementById('excFeeHint');
-    if(h) h.textContent = hit && hit.fee ? ('Cobra taxa ' + hit.fee) : '';
-    return hit;
-  }
   if(exc){
     exc.addEventListener('input', e => {
-      const hit = updExcHint(e.target.value);
+      const hit = EXC_BY_NAME[e.target.value.trim().toLowerCase()];
       if(hit){
         const s = document.getElementById('f_setor'); if(s) s.value = hit.s;
         const vg = document.getElementById('f_vaga');  if(vg) vg.value = hit.v;
         setVeiculo(hit.van ? 'van' : 'onibus');
       }
     });
-    updExcHint(exc.value);
   }
 }
 function veiculoToggleHtml(v){
@@ -681,6 +678,13 @@ function veiculoToggleHtml(v){
 function setVeiculo(v){
   editorVeiculo = v;
   document.querySelectorAll('#veicSeg button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+}
+function clearSearch(){
+  const s = document.getElementById('search');
+  if(s){ s.value = ''; s.focus(); }
+  const cb = document.getElementById('searchClear');
+  if(cb) cb.classList.remove('show');
+  render();
 }
 function readFields(){
   const v = {};
@@ -900,7 +904,12 @@ function toast(msg, isError){
 
 /* ---------- Events + Init ---------- */
 function initApp(){
-  document.getElementById('search').addEventListener('input', render);
+  const searchEl = document.getElementById('search');
+  searchEl.addEventListener('input', () => {
+    const cb = document.getElementById('searchClear');
+    if(cb) cb.classList.toggle('show', searchEl.value.length > 0);
+    render();
+  });
   document.getElementById('excSearch').addEventListener('input', renderExcManager);
   document.getElementById('importText').addEventListener('input', e => {
     const n = parseImport(e.target.value).length;
